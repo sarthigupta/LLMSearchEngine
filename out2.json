@@ -1,0 +1,199 @@
+{
+  "workflows": [
+    {
+      "id": "tVzwUjDpe7zFeYpHYgChD",
+      "prompt": "Find AI startups",
+      "spec": "{\"needs_clarification\":false,\"filters\":{\"tags\":[\"artificial intelligence\",\"machine learning\",\"ai\"]},\"fields\":[\"company_name\",\"website\",\"description\",\"founded_date\",\"location\",\"employee_count\",\"total_funding\",\"tags\"]}",
+      "plan": "{\"steps\":[{\"id\":\"1\",\"type\":\"web_search\",\"params\":{\"queries\":[\"Top AI and Machine Learning startups 2023\",\"List of Artificial Intelligence companies with funding details\",\"AI startups funding rounds and employee count 2024\",\"Latest venture capital investments in AI and machine learning startups\",\"Leading AI companies in technology sector with company profiles\",\"Artificial intelligence machine learning innovation companies list\"],\"num_results_per_query\":20},\"depends_on\":[]},{\"id\":\"2\",\"type\":\"fetch_pages\",\"params\":{\"urls\":[\"$1.web_search.results.urls\"]},\"depends_on\":[\"1\"]},{\"id\":\"3\",\"type\":\"extract_structured\",\"params\":{\"content\":\"$2.pages.web_content\",\"fields\":{\"company_name\":\"The full legal or common name of the company\",\"website\":\"Official website URL of the company\",\"description\":\"Brief description of what the company does or its mission\",\"founded_date\":\"Date the company was established (year or full date)\",\"location\":\"Primary location or headquarters of the company\",\"employee_count\":\"Approximate number of employees\",\"total_funding\":\"Total amount of funding raised by the company\",\"tags\":[\"categories, keywords, or labels associated with the company's field\"]},\"related_tags_filter\":[\"artificial intelligence\",\"machine learning\",\"ai\"]},\"depends_on\":[\"2\"]},{\"id\":\"4\",\"type\":\"clean_normalize\",\"params\":{\"data\":\"$3.extracted_fields\",\"normalization_rules\":{\"company_name\":\"Convert to title case and remove duplicates\",\"website\":\"Ensure all URLs have https:// prefix\",\"founded_date\":\"Standardize to ISO 8601 format (YYYY-MM)\",\"employee_count\":\"Convert to integers, estimate between given ranges\",\"total_funding\":\"Convert to a consistent numeric format (USD)\"}},\"depends_on\":[\"3\"]},{\"id\":\"5\",\"type\":\"validate\",\"params\":{\"data\":\"$4.cleaned_fields\",\"rules\":[\"website must be a valid URL\",\"founded_date must be a valid ISO 8601 date or null\",\"employee_count must be a positive integer or null\",\"total_funding must be a non-negative number or null\",\"company_name must be a non-empty string\"]},\"depends_on\":[\"4\"]},{\"id\":\"6\",\"type\":\"deduplicate\",\"params\":{\"data\":\"$5.validated_fields\",\"key\":\"company_name\"},\"depends_on\":[\"5\"]},{\"id\":\"7\",\"type\":\"store\",\"params\":{\"data\":\"$6.deduplicated_fields\",\"database\":\"ai_companies_db\",\"table\":\"companies\",\"mode\":\"upsert\",\"fields\":[\"company_name\",\"website\",\"description\",\"founded_date\",\"location\",\"employee_count\",\"total_funding\",\"tags\"]},\"depends_on\":[\"6\"]}]}",
+      "status": "running",
+      "progress_pct": 14,
+      "control_flag": null,
+      "error": null
+    }
+  ],
+  "tasks": [
+    {
+      "id": "1_AoiH",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "step_id": "1",
+      "type": "web_search",
+      "status": "completed",
+      "progress": 100,
+      "error": null,
+      "message": "Completed"
+    },
+    {
+      "id": "2_9Ea8",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "step_id": "2",
+      "type": "fetch_pages",
+      "status": "running",
+      "progress": 0,
+      "error": null,
+      "message": "Starting step..."
+    },
+    {
+      "id": "3_GyAs",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "step_id": "3",
+      "type": "extract_structured",
+      "status": "pending",
+      "progress": 0
+    },
+    {
+      "id": "4_5oTq",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "step_id": "4",
+      "type": "clean_normalize",
+      "status": "pending",
+      "progress": 0
+    },
+    {
+      "id": "5_aa3s",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "step_id": "5",
+      "type": "validate",
+      "status": "pending",
+      "progress": 0
+    },
+    {
+      "id": "6_sfcE",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "step_id": "6",
+      "type": "deduplicate",
+      "status": "pending",
+      "progress": 0
+    },
+    {
+      "id": "7_f_9I",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "step_id": "7",
+      "type": "store",
+      "status": "pending",
+      "progress": 0
+    }
+  ],
+  "task_logs": [
+    {
+      "id": "EI4I2zyDyVMhK31Ct3oXs",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "level": "info",
+      "message": "Searching Tavily for queries: Top AI and Machine Learning startups 2023, List of Artificial Intelligence companies with funding details, AI startups funding rounds and employee count 2024, Latest venture capital investments in AI and machine learning startups, Leading AI companies in technology sector with company profiles, Artificial intelligence machine learning innovation companies list"
+    },
+    {
+      "id": "uDIZbzJqd4xj8qlXP-wwg",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "level": "info",
+      "message": "Found 29 unique URLs"
+    }
+  ],
+  "fetch_logs": [
+    {
+      "id": "YaUpvR4M7IpzRtAjtTh1n",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://pitchbook.com/news/reports/2023-artificial-intelligence-machine-learning-overview",
+      "status_code": 403,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "XB6i_e7-LApoAk87NxoiA",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://www.linkedin.com/posts/lonnejaffe_the-34-most-promising-ai-startups-of-2023-activity-7102282377200025601-fe1P",
+      "status_code": null,
+      "robots_allowed": false,
+      "cached": false
+    },
+    {
+      "id": "7kd8PfPAcJhMsWWs0dv8t",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://www.failory.com/startups/machine-learning-unicorns",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "gWQ9zX45Kv_KAbG3pxd3T",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://mitsloan.mit.edu/ideas-made-to-matter/10-startups-harnessing-power-ai",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "YQ1x1-1WHgla_myeiBDNr",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://www.businessinsider.com/top-venture-capitalists-investing-ai-machine-learning-startups-2022-10?op=1",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "-MiNSJBF1sqr-x3dcrpry",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://www.vcbacked.co/ai-startups",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "rZU2n4at8MY7f8PG58zyu",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://tracxn.com/d/companies/artificial-intelligence/__FDng4JiBLcCFCXgW-XRmhm5ZAzDGd4iRmtM8n824shs/funding-and-investors",
+      "status_code": null,
+      "robots_allowed": false,
+      "cached": false
+    },
+    {
+      "id": "jYXAFLkyEziyj6A0eaZU3",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://www.forbes.com/lists/ai50",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "bFTAtLYYVLDrax2GieoP9",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://fundraiseinsider.com/blog/ai-startups",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "NLx-rvzEqryhxHvYk5Xr1",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://tracxn.com/d/companies/artificial-intelligence-expert/__dOhSXl3pfK965UvWX8WAG1cBXs69GEHLnLdA1ekLBRc/funding-and-investors",
+      "status_code": null,
+      "robots_allowed": false,
+      "cached": false
+    },
+    {
+      "id": "hm54JUTnWgWuCg2tb9EK2",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://www.scalecapital.com/stories/generative-ai-landscape-q4-2024-ai-investments-reach-historic-high",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "g23-dl94ojWwbmsYgTjRO",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://ca.finance.yahoo.com/news/ai-startups-drive-vc-funding-140305605.html",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    },
+    {
+      "id": "nM9k60iY2w-PPgcZWAkwE",
+      "workflow_id": "tVzwUjDpe7zFeYpHYgChD",
+      "url": "https://carta.com/data/ai-fundraising-trends-2024",
+      "status_code": 200,
+      "robots_allowed": true,
+      "cached": false
+    }
+  ],
+  "datasets": [],
+  "records": [],
+  "record_sources": []
+}

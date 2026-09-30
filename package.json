@@ -1,0 +1,34 @@
+{
+  "name": "llmengine",
+  "version": "1.0.0",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "vitest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/genai": "^2.24.0",
+    "@mozilla/readability": "^0.6.0",
+    "@tavily/core": "^0.7.13",
+    "better-sqlite3": "^13.0.3",
+    "cheerio": "^1.2.0",
+    "chrono-node": "^2.10.1",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
+    "exceljs": "^4.4.0",
+    "express": "^5.2.1",
+    "fuzzball": "^2.2.6",
+    "groq-sdk": "^1.6.0",
+    "jsdom": "^28.1.0",
+    "nanoid": "^6.0.1",
+    "p-queue": "^9.3.3",
+    "robots-parser": "^3.0.1",
+    "zod": "^4.6.5",
+    "zod-to-json-schema": "^3.25.2"
+  }
+}
