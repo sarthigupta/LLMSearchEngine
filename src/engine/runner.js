@@ -44,7 +44,7 @@ export async function runWorkflow(workflowId, plan) {
         let progressAccum = 0;
 
         for (const step of sortedSteps) {
-            if (ctx.shouldStop()) {
+            if (await ctx.shouldStop()) {
                 repo.updateWorkflowStatus(workflowId, 'cancelled');
                 engineEvents.emit('workflow_status', { workflowId, status: 'cancelled' });
                 return;

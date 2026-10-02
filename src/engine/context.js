@@ -14,8 +14,8 @@ export function createContext(workflowId) {
             repo.updateTaskProgress(stepId, progress, message);
             engineEvents.emit('task_update', { workflowId, stepId, progress, message });
         },
-        shouldStop: () => {
-            const wf = repo.getWorkflowControlFlag(workflowId);
+        shouldStop: async () => {
+            const wf = await repo.getWorkflowControlFlag(workflowId);
             return wf && (wf.control_flag === 'cancel' || wf.control_flag === 'pause');
         }
     };

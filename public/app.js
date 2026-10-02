@@ -11,8 +11,25 @@ document.addEventListener('alpine:init', () => {
         inspectedRecord: null,
         inspectedSources: [],
         eventSource: null,
+        history: [],
+        showHistory: false,
+        searchQuery: '',
 
-        init() {},
+        init() {
+            this.fetchHistory();
+        },
+
+        get filteredRecords() {
+            if (!this.searchQuery.trim()) return this.records;
+            const q = this.searchQuery.toLowerCase();
+            return this.records.filter(r => {
+                // Check all column data
+                return this.columns.some(col => {
+                    const val = r.data[col];
+                    return val && String(val).toLowerCase().includes(q);
+                });
+            });
+        },
 
         async submitWorkflow() {
             if (!this.prompt.trim()) return;
@@ -106,6 +123,60 @@ document.addEventListener('alpine:init', () => {
             } catch (err) {
                 console.error("Failed to fetch record detail", err);
             }
+        },
+
+        async fetchHistory() {
+            try {
+                const res = await fetch('/api/history');
+                const data = await res.json();
+                this.history = data.workflows || [];
+            } catch (err) {
+                console.error("Failed to fetch history", err);
+            }
+        },
+
+        async loadWorkflow(workflow) {
+            this.currentWorkflowId = workflow.id;
+            this.prompt = workflow.prompt;
+            this.status = workflow.status;
+            this.progress = workflow.progress_pct;
+            this.records = [];
+            this.columns = [];
+            this.logs = [`Loaded past workflow: ${workflow.id}`];
+            this.showHistory = false;
+            
+            if (workflow.status === 'completed') {
+                this.fetchResults();
+            }
+        },
+
+        exportCSV() {
+            const recordsToExport = this.filteredRecords;
+            if (recordsToExport.length === 0) return;
+            
+            const cols = this.columns.slice();
+            cols.push('confidence');
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += cols.join(",") + "\r\n";
+            
+            recordsToExport.forEach(r => {
+                const row = cols.map(col => {
+                    let val = col === 'confidence' ? r.confidence : r.data[col];
+                    if (val === null || val === undefined) val = "";
+                    val = String(val).replace(/"/g, '""');
+                    return `"${val}"`;
+                });
+                csvContent += row.join(",") + "\r\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `llm_extract_${this.currentWorkflowId}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     }));
 });

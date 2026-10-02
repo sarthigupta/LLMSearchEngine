@@ -11,20 +11,20 @@ export async function store(ctx, records, params) {
         schemaFields = Object.keys(records[0].data);
     }
     
-    db.datasets.push({ id: datasetId, workflow_id: ctx.workflowId, schema_fields: JSON.stringify(schemaFields), version: 1 });
+    await db.collection('datasets').insertOne({ id: datasetId, workflow_id: ctx.workflowId, schema_fields: schemaFields, version: 1 });
     
     for (const rec of records) {
         const recId = nanoid();
-        db.records.push({
+        await db.collection('records').insertOne({
             id: recId,
             dataset_id: datasetId,
-            data: JSON.stringify(rec.data),
+            data: rec.data,
             confidence: rec.confidence || 0,
             validation_status: rec.validation_status || 'valid'
         });
         
         for (const src of rec.sources) {
-            db.record_sources.push({
+            await db.collection('record_sources').insertOne({
                 id: nanoid(),
                 record_id: recId,
                 url: src.url,

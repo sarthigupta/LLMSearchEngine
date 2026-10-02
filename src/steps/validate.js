@@ -3,7 +3,7 @@ export async function validate(ctx, records, params) {
     const required = params.required_fields || [];
     
     for (let i = 0; i < records.length; i++) {
-        if (ctx.shouldStop()) break;
+        if (await ctx.shouldStop()) break;
         const rec = records[i];
         
         let valid = true;

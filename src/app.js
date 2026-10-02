@@ -13,18 +13,13 @@ app.use(cors());
 app.use(express.json());
 
 // API: Health Check
-app.get('/api/health', (req, res) => {
+app.get('/api/health', async (req, res) => {
     try {
-        repo.getHealth();
-        res.json({ status: 'ok', db: 'connected' });
+        const health = await repo.getHealth();
+        res.json({ status: health.status, db: 'connected' });
     } catch (e) {
         res.status(500).json({ status: 'error', error: e.message });
     }
-});
-
-app.get('/api/debug', async (req, res) => {
-    const { db } = await import('./db/index.js');
-    res.json(db);
 });
 
 app.use('/api', api);
@@ -34,13 +29,13 @@ app.use(express.static(join(__dirname, '../public')));
 
 // On boot, mark workflows stuck in 'running' as 'failed' (per architecture section 14)
 try {
-    import('./db/index.js').then(({ db }) => {
-        db.workflows.forEach(w => {
-            if (w.status === 'running') {
-                w.status = 'failed';
-                w.error = 'Process restarted mid-run';
-            }
-        });
+    import('./db/index.js').then(async ({ db }) => {
+        if (db) {
+            await db.collection('workflows').updateMany(
+                { status: 'running' },
+                { $set: { status: 'failed', error: 'Process restarted mid-run' } }
+            );
+        }
     });
 } catch (e) {
     console.error('Failed to reset running workflows on boot:', e);

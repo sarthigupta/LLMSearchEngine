@@ -19,7 +19,7 @@ export async function webSearch(ctx, data, params) {
     let results = [];
     
     for (const query of params.queries) {
-        if (ctx.shouldStop()) break;
+        if (await ctx.shouldStop()) break;
         const res = await tvly.search(query, { maxResults: params.max_results_per_query || 5 });
         results.push(...res.results.map(r => ({ url: r.url, title: r.title, snippet: r.content })));
     }

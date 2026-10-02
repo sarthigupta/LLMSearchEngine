@@ -32,7 +32,7 @@ api.post('/workflows', async (req, res) => {
             plan = getDefaultPlan(spec);
         }
 
-        const id = repo.createWorkflow(prompt, spec, plan);
+        const id = await repo.createWorkflow(prompt, spec, plan);
         enqueueWorkflow(id, plan);
 
         res.json({ id });
@@ -51,11 +51,12 @@ api.get('/workflows/:id/events', (req, res) => {
     const send = (event, data) => res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
 
     // Send initial state
-    const wf = db.workflows.find(w => w.id === id);
-    if (wf) {
-        send('workflow_status', { workflowId: id, status: wf.status, error: wf.error });
-        send('progress', { workflowId: id, progress_pct: wf.progress_pct });
-    }
+    db.collection('workflows').findOne({ id }).then(wf => {
+        if (wf) {
+            send('workflow_status', { workflowId: id, status: wf.status, error: wf.error });
+            send('progress', { workflowId: id, progress_pct: wf.progress_pct });
+        }
+    }).catch(console.error);
 
     const onEvent = (type) => (data) => {
         if (data.workflowId === id) send(type, data);
@@ -79,30 +80,40 @@ api.get('/workflows/:id/events', (req, res) => {
     });
 });
 
-api.get('/datasets/:workflowId/records', (req, res) => {
+api.get('/datasets/:workflowId/records', async (req, res) => {
     try {
         const { workflowId } = req.params;
-        const ds = db.datasets.filter(d => d.workflow_id === workflowId);
+        const ds = await db.collection('datasets').find({ workflow_id: workflowId }).toArray();
         if (ds.length === 0) return res.json({ records: [] });
         const dataset = ds[ds.length - 1]; 
         
-        const records = db.records.filter(r => r.dataset_id === dataset.id);
-        const parsed = records.map(r => ({ ...r, data: JSON.parse(r.data) }));
+        const records = await db.collection('records').find({ dataset_id: dataset.id }).toArray();
+        // Since we insert objects directly into mongodb now, data might already be an object or we still parse if it was a string
+        const parsed = records.map(r => ({ ...r, data: typeof r.data === 'string' ? JSON.parse(r.data) : r.data }));
         res.json({ records: parsed });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-api.get('/records/:id', (req, res) => {
+api.get('/records/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const record = db.records.find(r => r.id === id);
+        const record = await db.collection('records').findOne({ id });
         if (!record) return res.status(404).json({ error: 'Not found' });
         
-        const data = { ...record, data: JSON.parse(record.data) };
-        const sources = db.record_sources.filter(s => s.record_id === id);
+        const data = { ...record, data: typeof record.data === 'string' ? JSON.parse(record.data) : record.data };
+        const sources = await db.collection('record_sources').find({ record_id: id }).toArray();
         res.json({ record: data, sources });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+api.get('/history', async (req, res) => {
+    try {
+        const workflows = await db.collection('workflows').find().sort({ created_at: -1 }).limit(10).toArray();
+        res.json({ workflows });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

@@ -2,47 +2,100 @@ import { nanoid } from 'nanoid';
 import { db } from './index.js';
 
 export const repo = {
-    getHealth: () => ({ status: 'ok' }),
+    getHealth: async () => {
+        try {
+            await db.command({ ping: 1 });
+            return { status: 'ok' };
+        } catch (e) {
+            return { status: 'error', error: e.message };
+        }
+    },
 
-    createWorkflow: (prompt, spec, plan) => {
+    createWorkflow: async (prompt, spec, plan) => {
         const id = nanoid();
-        db.workflows.push({ id, prompt, spec: JSON.stringify(spec), plan: JSON.stringify(plan), status: 'queued', progress_pct: 0, control_flag: null });
+        await db.collection('workflows').insertOne({
+            id,
+            prompt,
+            spec,
+            plan,
+            status: 'queued',
+            progress_pct: 0,
+            control_flag: 'none',
+            created_at: new Date(),
+            updated_at: new Date()
+        });
         return id;
     },
 
-    updateWorkflowStatus: (id, status, error = null) => {
-        const wf = db.workflows.find(w => w.id === id);
-        if (wf) { wf.status = status; wf.error = error; }
+    updateWorkflowStatus: async (id, status, error = null) => {
+        await db.collection('workflows').updateOne(
+            { id },
+            { $set: { status, error, updated_at: new Date() } }
+        );
     },
 
-    updateWorkflowProgress: (id, progress_pct) => {
-        const wf = db.workflows.find(w => w.id === id);
-        if (wf) wf.progress_pct = progress_pct;
+    updateWorkflowProgress: async (id, progress_pct) => {
+        await db.collection('workflows').updateOne(
+            { id },
+            { $set: { progress_pct, updated_at: new Date() } }
+        );
     },
 
-    getWorkflowControlFlag: (id) => {
-        return db.workflows.find(w => w.id === id);
+    getWorkflowControlFlag: async (id) => {
+        return await db.collection('workflows').findOne({ id }, { projection: { control_flag: 1 } });
     },
 
-    insertTask: (id, workflow_id, type) => {
-        db.tasks.push({ id: id + '_' + nanoid(4), workflow_id, step_id: id, type, status: 'pending', progress: 0 });
+    insertTask: async (id, workflow_id, type) => {
+        const task_id = id + '_' + nanoid(4);
+        await db.collection('tasks').insertOne({
+            id: task_id,
+            workflow_id,
+            step_id: id,
+            type,
+            status: 'pending',
+            progress: 0,
+            started_at: new Date()
+        });
     },
 
-    updateTaskStatus: (step_id, status, error = null) => {
-        const t = db.tasks.find(t => t.step_id === step_id);
-        if (t) { t.status = status; t.error = error; }
+    updateTaskStatus: async (step_id, status, error = null) => {
+        const updateDoc = { status, error };
+        if (['completed', 'failed'].includes(status)) {
+            updateDoc.ended_at = new Date();
+        }
+        await db.collection('tasks').updateOne(
+            { step_id },
+            { $set: updateDoc }
+        );
     },
 
-    updateTaskProgress: (step_id, progress, message) => {
-        const t = db.tasks.find(t => t.step_id === step_id);
-        if (t) { t.progress = progress; t.message = message; }
+    updateTaskProgress: async (step_id, progress, message) => {
+        await db.collection('tasks').updateOne(
+            { step_id },
+            { $set: { progress, message } }
+        );
     },
 
-    insertTaskLog: (workflow_id, step_id, level, message) => {
-        db.task_logs.push({ id: nanoid(), workflow_id, step_id, level, message });
+    insertTaskLog: async (workflow_id, step_id, level, message) => {
+        await db.collection('task_logs').insertOne({
+            id: nanoid(),
+            workflow_id,
+            step_id,
+            level,
+            message,
+            ts: new Date()
+        });
     },
 
-    insertFetchLog: (workflow_id, url, status_code, robots_allowed, cached) => {
-        db.fetch_logs.push({ id: nanoid(), workflow_id, url, status_code, robots_allowed, cached });
+    insertFetchLog: async (workflow_id, url, status_code, robots_allowed, cached) => {
+        await db.collection('fetch_logs').insertOne({
+            id: nanoid(),
+            workflow_id,
+            url,
+            status_code,
+            robots_allowed,
+            cached,
+            ts: new Date()
+        });
     }
 };

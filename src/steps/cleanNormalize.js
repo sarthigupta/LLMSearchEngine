@@ -3,7 +3,7 @@ import * as chrono from 'chrono-node';
 export async function cleanNormalize(ctx, records, params) {
     records = records || [];
     for (let i = 0; i < records.length; i++) {
-        if (ctx.shouldStop()) break;
+        if (await ctx.shouldStop()) break;
         ctx.emitProgress(ctx.stepId, Math.floor((i / records.length) * 100), `Normalizing record ${i+1}`);
         const rec = records[i];
         if (!rec.data) continue;

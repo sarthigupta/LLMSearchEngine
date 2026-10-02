@@ -32,9 +32,8 @@ export async function extractStructured(ctx, data, params) {
 
     const systemPrompt = `Extract records of type '${entityType}' from the page text. Return a JSON array in the 'items' field. Use null for missing fields. For each record include an 'evidence' field with a verbatim quote (under 200 chars) that supports it.`;
 
-    for (let i = 0; i < data.length; i++) {
-        if (ctx.shouldStop()) break;
-        const page = data[i];
+    const promises = data.map(async (page, i) => {
+        if (await ctx.shouldStop()) return [];
         ctx.emitProgress(ctx.stepId, Math.floor((i / data.length) * 100), `Extracting from ${page.url}`);
         
         try {
@@ -42,24 +41,40 @@ export async function extractStructured(ctx, data, params) {
             const reader = new Readability(dom.window.document);
             const article = reader.parse();
             
-            if (article && article.textContent) {
-                const text = article.textContent.replace(/\s+/g, ' ').slice(0, 8000); 
+            let rawText = '';
+            if (article && article.textContent && article.textContent.trim().length > 200) {
+                rawText = article.textContent;
+            } else if (dom.window.document.body) {
+                rawText = dom.window.document.body.textContent;
+            }
+            
+            if (rawText) {
+                // Lower chunk limit to 6000 for speed
+                const text = rawText.replace(/\s+/g, ' ').slice(0, 6000); 
                 const res = await generateJson({ system: systemPrompt, prompt: text, schema: extractSchema });
                 
+                const pageRecords = [];
                 for (const item of res.items) {
                     const evidence = item.evidence;
                     delete item.evidence;
-                    records.push({
+                    pageRecords.push({
                         data: item,
                         sources: [{ url: page.url, domain: new URL(page.url).hostname, fetched_at: page.fetchedAt, evidence }],
                         extraction_method: 'llm',
                         confidence: 0.8
                     });
                 }
+                return pageRecords;
             }
         } catch (e) {
             ctx.log(ctx.stepId, 'warn', `Extraction failed for ${page.url}: ${e.message}`);
         }
+        return [];
+    });
+
+    const results = await Promise.all(promises);
+    for (const res of results) {
+        records.push(...res);
     }
     return records;
 }
