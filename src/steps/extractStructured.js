@@ -34,6 +34,8 @@ export async function extractStructured(ctx, data, params) {
 
     const promises = data.map(async (page, i) => {
         if (await ctx.shouldStop()) return [];
+        if (!page || !page.html) return [];
+        
         ctx.emitProgress(ctx.stepId, Math.floor((i / data.length) * 100), `Extracting from ${page.url}`);
         
         try {

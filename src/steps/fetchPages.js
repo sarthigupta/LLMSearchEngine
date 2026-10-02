@@ -32,6 +32,6 @@ export async function fetchPages(ctx, data, params) {
         return null;
     });
 
-    const results = (await Promise.all(promises)).filter(r => r !== null);
+    const results = (await Promise.all(promises)).filter(r => r != null);
     return results;
 }
