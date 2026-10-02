@@ -9,8 +9,23 @@ import { api } from './routes/api.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 
+import { connectDB } from './db/index.js';
+
 app.use(cors());
 app.use(express.json());
+
+// Lazy load DB for serverless environments (like Vercel) where server.js is bypassed
+app.use(async (req, res, next) => {
+    try {
+        const { db } = await import('./db/index.js');
+        if (!db) {
+            await connectDB();
+        }
+        next();
+    } catch (e) {
+        next(e);
+    }
+});
 
 // API: Health Check
 app.get('/api/health', async (req, res) => {
@@ -29,9 +44,13 @@ app.use(express.static(join(__dirname, '../public')));
 
 // On boot, mark workflows stuck in 'running' as 'failed' (per architecture section 14)
 try {
-    import('./db/index.js').then(async ({ db }) => {
-        if (db) {
-            await db.collection('workflows').updateMany(
+    import('./db/index.js').then(async ({ connectDB, db }) => {
+        if (!db) await connectDB();
+        
+        // Re-import to get the populated db reference
+        const updatedDb = (await import('./db/index.js')).db;
+        if (updatedDb) {
+            await updatedDb.collection('workflows').updateMany(
                 { status: 'running' },
                 { $set: { status: 'failed', error: 'Process restarted mid-run' } }
             );
