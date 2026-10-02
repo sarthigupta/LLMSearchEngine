@@ -15,7 +15,8 @@ app.use(cors());
 app.use(express.json());
 
 // Lazy load DB for serverless environments (like Vercel) where server.js is bypassed
-app.use(async (req, res, next) => {
+// Only apply this to API routes so we don't break frontend static hosting!
+app.use('/api', async (req, res, next) => {
     try {
         const { db } = await import('./db/index.js');
         if (!db) {
