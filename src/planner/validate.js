@@ -29,7 +29,7 @@ export function validatePlan(plan, spec) {
 export function getDefaultPlan(spec) {
     return {
         steps: [
-            { id: "s1", type: "web_search", params: { queries: [spec.goal || ""] }, depends_on: [] },
+            { id: "s1", type: "web_search", params: { queries: [spec.goal || ""], max_results_per_query: 10 }, depends_on: [] },
             { id: "s2", type: "fetch_pages", params: { max_pages: 10 }, depends_on: ["s1"] },
             { id: "s3", type: "extract_structured", params: { entity_type: spec.entity_type || "generic", fields: spec.fields || [] }, depends_on: ["s2"] },
             { id: "s4", type: "clean_normalize", params: {}, depends_on: ["s3"] },

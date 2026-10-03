@@ -39,7 +39,8 @@ export async function generateJson({ system, prompt, schema }) {
                 { role: 'system', content: fullSystem },
                 { role: 'user', content: finalPrompt }
             ],
-            response_format: { type: 'json_object' }
+            response_format: { type: 'json_object' },
+            max_tokens: 800
         });
         
         let text = response.choices[0]?.message?.content || "";
