@@ -25,7 +25,7 @@ sudo systemctl start docker
 # 3. Add ubuntu user to docker group (so you don't need sudo for docker)
 sudo usermod -aG docker ubuntu
 
-# 4. Pull and start the application
+# 4. Pull and start the aapplication
 echo "Starting the application using Docker Compose..."
 sudo docker compose up -d --build
 

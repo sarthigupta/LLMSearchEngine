@@ -71,7 +71,8 @@ async function searchSearXNG(baseUrl, query, timeRange, ctx) {
         
         const res = await fetch(url, {
             headers: {
-                'X-Forwarded-For': '127.0.0.1',
+                'X-Forwarded-For': '192.168.1.100',
+                'X-Real-IP': '192.168.1.100',
                 'Accept': 'application/json'
             },
             signal: AbortSignal.timeout(10000)
