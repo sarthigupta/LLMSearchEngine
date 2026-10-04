@@ -24,9 +24,20 @@ A full-stack Node.js application that leverages Large Language Models (LLMs) and
 ## Setup Instructions
 
 ### Local Development
-1. Clone the repository.
-2. Run `npm install`.
-3. Copy `.env.example` to `.env` and fill in your keys:
+1. Clone the repository and navigate into the folder:
+   ```bash
+   git clone https://github.com/yourusername/LLMEngine.git
+   cd LLMEngine
+   ```
+2. Install the required Node.js dependencies:
+   ```bash
+   npm install
+   ```
+3. Copy `.env.example` to `.env` and fill in your API keys:
+   ```bash
+   cp .env.example .env
+   ```
+   *Edit the `.env` file to look like this:*
    ```env
    PORT=8000
    GROQ_API_KEY=your_groq_api_key
@@ -34,29 +45,43 @@ A full-stack Node.js application that leverages Large Language Models (LLMs) and
    MONGODB_URI=mongodb://localhost:27017/llmengine
    SEARXNG_URL=http://localhost:8080
    ```
-4. Start SearXNG locally via Docker.
-5. Run `npm run dev` to start the backend.
+4. Start SearXNG (the search engine) locally using Docker:
+   ```bash
+   docker compose up searxng -d
+   ```
+5. Start the backend Node.js application:
+   ```bash
+   npm run dev
+   ```
 
-### Production Deployment (AWS / VPS)
-You can deploy the entire stack (App + SearXNG) seamlessly using Docker Compose.
+### Production Deployment (AWS / Ubuntu VPS)
+You can deploy the entire stack (Node.js App + SearXNG + Playwright) seamlessly using Docker Compose.
 
-1. Clone the repository on your server.
-2. Create a `.env` file in the root directory:
+1. SSH into your server, clone the repository, and enter the directory:
+   ```bash
+   git clone https://github.com/yourusername/LLMEngine.git
+   cd LLMEngine
+   ```
+2. Create a `.env` file on your server:
+   ```bash
+   nano .env
+   ```
+   *Paste the following contents into it, then press `Ctrl+X`, `Y`, and `Enter` to save:*
    ```env
    PORT=8000
    GROQ_API_KEY=your_groq_api_key
    MONGODB_URI=your_mongodb_connection_string
    ```
-3. Run the automated deployment script (for Ubuntu):
+3. Run the automated deployment script (this will install Docker if it's missing, and start everything):
    ```bash
    chmod +x deploy.sh
    ./deploy.sh
    ```
    *Alternatively, if Docker is already installed, just run:*
    ```bash
-   docker compose up -d --build
+   sudo docker compose up -d --build
    ```
-4. Access the UI at `http://<YOUR_SERVER_IP>:8000`.
+4. Access the UI at `http://<YOUR_SERVER_PUBLIC_IP>:8000`.
 
 ## How It Works
 1. **User Prompt**: The user enters a natural language query in the UI.
